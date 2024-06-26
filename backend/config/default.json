@@ -1,0 +1,4 @@
+{
+    "mongoURI":"mongodb+srv://walid:Chaffar1999@cluster0.nzsew.mongodb.net/crtravelDB?retryWrites=true&w=majority&appName=Cluster0",
+    "jwtSecret":"mysecrettoken"
+}
