@@ -31,6 +31,7 @@ const ShareTripModal = ({ visible, onClose, userId }) => {
 
   const dispatch = useDispatch();
 
+
   const handleChange = (name, value) => {
     setTripDetails({ ...tripDetails, [name]: value });
   };

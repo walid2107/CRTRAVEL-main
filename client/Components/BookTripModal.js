@@ -1,18 +1,39 @@
-import React, { useState } from 'react';
-import { StyleSheet, View, Text } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import { StyleSheet, View, Text, TextInput, Alert } from 'react-native';
 import { Modal, Title, Button } from 'react-native-paper';
 import RNPickerSelect from 'react-native-picker-select';
 import MultiSelect from 'react-native-multiple-select';
+import { useDispatch } from 'react-redux';
+import { bookTrip } from '../redux/API/reservationAPI';
 
-const BookTripModal = ({ visible, onClose, trip }) => {
+const BookTripModal = ({ visible, onClose, trip, userId,verifySeat }) => {
   const [selectedSeats, setSelectedSeats] = useState(null);
   const [selectedActivities, setSelectedActivities] = useState([]);
   const [selectedServices, setSelectedServices] = useState([]);
-
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const dispatch = useDispatch();
 
   if (!trip) {
     return null;
   }
+  useEffect(()=>{
+    if(trip.availableSeats <= 0)
+    {
+      Alert.alert(
+        "No more available places!",
+        null,
+        [
+          {
+            text: "OK",
+            onPress: () => {
+              onClose();
+            }
+          }
+        ],
+        { cancelable: false }
+      );
+    }
+  },[verifySeat]);
 
   const seatsOptions = Array.from({ length: trip.availableSeats }, (_, i) => ({
     label: `${i + 1}`,
@@ -29,20 +50,45 @@ const BookTripModal = ({ visible, onClose, trip }) => {
     name: service.name,
   }));
 
-
   const handleBookTrip = () => {
-    // Handle the booking logic here
-    console.log('Booking Trip with the following details:');
-    console.log('Number of Seats:', selectedSeats);
-    console.log('Additional Activities:', selectedActivities);
-    console.log('Additional Services:', selectedServices);
-    onClose();
+    const bookTripInfo = {
+      user: userId,
+      trip: trip._id,
+      numberOfSeats: selectedSeats,
+      additionalServices: selectedServices,
+      additionalActivities: selectedActivities,
+      phoneNumber,
+    };
+
+    dispatch(bookTrip(bookTripInfo))
+      .then((result) => {
+        if (result.success) {
+          onClose();
+          setSelectedSeats(null);
+          setSelectedActivities([]);
+          setSelectedServices([]);
+          setPhoneNumber('');
+        } else {
+          Alert.alert(result.errors[0].msg);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   return (
     <Modal visible={visible} onDismiss={onClose} contentContainerStyle={styles.modalContainer}>
       <View style={styles.modalContent}>
         <Title style={styles.modalTitle}>Book Trip: {trip.title}</Title>
+        <Text>Phone Number</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Enter your phone number"
+          value={phoneNumber}
+          onChangeText={setPhoneNumber}
+          keyboardType="phone-pad"
+        />
         <Text>Number of Seats</Text>
         <RNPickerSelect
           onValueChange={(value) => setSelectedSeats(value)}
@@ -115,6 +161,14 @@ const styles = StyleSheet.create({
     marginTop: 20,
   },
   multiSelect: {
+    marginBottom: 10,
+  },
+  input: {
+    height: 40,
+    borderColor: 'gray',
+    borderWidth: 1,
+    borderRadius: 4,
+    paddingHorizontal: 10,
     marginBottom: 10,
   },
 });

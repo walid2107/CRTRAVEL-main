@@ -5,7 +5,6 @@ const initialState={
     allTrips:[],
     mytrips:[],
     trip: null,
-    loading: true,
     error: [],
 }
 

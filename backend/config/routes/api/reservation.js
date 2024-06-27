@@ -12,13 +12,10 @@ const router = express.Router();
 const createReservationValidation= [
     body('numberOfSeats').isInt({ gt: 0 }).withMessage('Number of seats must be a positive integer'),
     body('additionalServices').isArray().withMessage('Services must be an array'),
-    body('additionalServices.*.name').notEmpty().withMessage('Service name is required'),
-    body('additionalServices.*.price').isFloat({ gt: 0 }).withMessage('Service price must be a positive number'),
-    body('additionalServices.*.duration').isFloat({ gt: 0 }).withMessage('Service duration must be a positive number'),
     body('additionalActivities').isArray().withMessage('Activities must be an array'),
-    body('additionalActivities.*.name').notEmpty().withMessage('Activity name is required'),
-    body('additionalActivities.*.price').isFloat({ gt: 0 }).withMessage('Activity price must be a positive number'),
-    body('additionalActivities.*.duration').isFloat({ gt: 0 }).withMessage('Activity duration must be a positive number')
+    body('phoneNumber')
+    .isMobilePhone()
+    .withMessage('Invalid phone number')
 ];
 
 
@@ -28,10 +25,10 @@ const createReservationValidation= [
 router.post('/create',verifyToken,createReservationValidation, async (req, res) => {
         const errors = validationResult(req);
         if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
+            return res.status(400).json({ errors: errors.array(),success:false });
         }
 
-        const { user,trip ,numberOfSeats,additionalServices,additionalActivities } = req.body;
+        const { user,trip ,numberOfSeats,additionalServices,additionalActivities,phoneNumber } = req.body;
 
         let servicesAmount=0;
         let activitiesAmount=0;
@@ -49,8 +46,12 @@ router.post('/create',verifyToken,createReservationValidation, async (req, res) 
 
         const tripOBJ = await Trip.findOne({_id: trip });
         console.log(tripOBJ);
+        if(tripOBJ.numberOfSeats < numberOfSeats ){
+            return res.status(400).json({ errors: [{msg:"No more available places !"}],success:false });
+        }
+        await Trip.findByIdAndUpdate(tripOBJ._id, {availableSeats:(tripOBJ.availableSeats)-numberOfSeats}, { new: true });
         if (!tripOBJ) {
-            return res.status(404).json({ error: 'This trip is no more available or deleted !' });
+            return res.status(404).json({ errors:[{msg: 'This trip is no more available or deleted !'}]});
          }
         finalAmount = ((tripOBJ.basePrice.price)*numberOfSeats) + servicesAmount + activitiesAmount;
 
@@ -62,11 +63,12 @@ router.post('/create',verifyToken,createReservationValidation, async (req, res) 
                 finalAmount,
                 additionalServices,
                 additionalActivities,
+                phoneNumber
             });
             await reservation.save();
-            res.status(201).json(reservation);
+            res.status(201).send({reservation,success:true});
         } catch (error) {
-            res.status(500).json({ error: error.message });
+            res.status(500).json({ errors: [{msg:error.message}],success:false });
         }
     }
 );

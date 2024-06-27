@@ -1,0 +1,2 @@
+export const BOOK_TRIP_SUCESS='BOOK_TRIP_SUCESS';
+export const BOOK_TRIP_FAIL='BOOK_TRIP_FAIL';

@@ -21,6 +21,7 @@ const HomeScreen = (props) => {
   const [isModalVisible, setIsModalVisible] = useState(false); // New state for modal visibility
   const [isBookModalVisible, setIsBookModalVisible] = useState(false);
   const { trips, getAllTrips, navigation } = props;
+  const [verifySeat, setVerifySeat] = useState(false);
 
   const loadProfile = async () => {
     try {
@@ -81,6 +82,7 @@ const HomeScreen = (props) => {
 
   const onBook=(trip)=>{
     setBookedTrip(trip);
+    setVerifySeat(!verifySeat);
     openBookModal();
   }
 
@@ -110,7 +112,7 @@ const HomeScreen = (props) => {
         />
         <Portal>
           <ShareTripModal visible={isModalVisible} onClose={closeModal} userId={userId} />
-          <BookTripModal visible={isBookModalVisible} onClose={closeBookModal} trip={bookedTrip} />
+          <BookTripModal visible={isBookModalVisible} onClose={closeBookModal} trip={bookedTrip} userId={userId} verifySeat={verifySeat}/>
         </Portal>
       </View>
     </Provider>

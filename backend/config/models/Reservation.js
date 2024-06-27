@@ -39,7 +39,11 @@ const ReservationSchema = new Schema({
         type: [Schema.Types.ObjectId],
         ref: 'Activity',
         default: []
-    }]
+    }],
+    phoneNumber:{
+        type:String,
+        required:true
+    }
 
 });
 
