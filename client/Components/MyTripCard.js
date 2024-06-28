@@ -34,7 +34,7 @@ const MyTripCard = ({ trip }) => {
       <Card.Actions>
         <Text>Likes: 250</Text>
         <Text> </Text>
-        <Text>Reservations: 10</Text>
+        <Text>Reservations: 1</Text>
         <Text> </Text>
         <Text>Rating: 2,5</Text>
       </Card.Actions>

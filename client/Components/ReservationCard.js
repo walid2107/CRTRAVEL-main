@@ -22,6 +22,7 @@ const ReservationCard = ({ reservation, onConfirmReservation, onConfirmPayment }
 
   return (
     <View style={styles.card}>
+      {reservation.trip && <>
       <Avatar.Image size={40} source={{ uri: 'http://192.168.245.153:5000'+reservation.user.image }} />
       <Text style={styles.name}>{reservation.user.fullName}</Text>
       <Text>Trip Title: {reservation.trip.title}</Text>
@@ -61,6 +62,7 @@ const ReservationCard = ({ reservation, onConfirmReservation, onConfirmPayment }
           </View>
         )}
       </View>
+      </>}
     </View>
   );
 };

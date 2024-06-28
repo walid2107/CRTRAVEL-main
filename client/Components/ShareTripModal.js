@@ -85,11 +85,13 @@ const ShareTripModal = ({ visible, onClose, userId }) => {
 
   const handleStartDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || tripDetails.startDate;
+    setShowStartDatePicker(false);
     handleChange('startDate', currentDate);
   };
 
   const handleEndDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || tripDetails.endDate;
+    setShowEndDatePicker(false);
     handleChange('endDate', currentDate);
   };
 

@@ -51,6 +51,7 @@ const RegisterScreen = ({ navigation }) => {
                                     email: values.email,
                                     password: values.password
                                 };
+                               
                                 dispatch(authAPI.registerUser(user, image))
                                     .then(async (result) => {
                                         if (result.success) {
@@ -62,12 +63,14 @@ const RegisterScreen = ({ navigation }) => {
                                             actions.setSubmitting(false);
                                             navigation.navigate("Main");
                                         } else {
-                                            Alert.alert(result.errors[0].message);
+                                        
+                                            Alert.alert(result.errors[0].msg);
                                             actions.setSubmitting(false);
                                         }
                                     })
                                     .catch((err) => {
-                                        Alert.alert("An error occurred. Please try again.");
+                                       
+                                        Alert.alert(err.data.errors[0].msg);
                                         actions.setSubmitting(false);
                                     });
                             }}

@@ -5,10 +5,7 @@ const BASE_URL = 'http://192.168.245.153:5000';
 
 export const registerUser = (authData, imageUri) => {
     return async dispatch => {
-        const { fullName, email, password } = authData;
-
-        console.log(imageUri);
-        
+        const { fullName, email, password } = authData;        
         const formData = new FormData();
         formData.append('fullName', fullName);
         formData.append('email', email);

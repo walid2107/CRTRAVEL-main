@@ -36,8 +36,6 @@ const registerValidation=[
     check('fullName')
     .isLength({min:2})
     .withMessage('Your full name is required !')
-    .isAlphanumeric()
-    .withMessage('Please provide a valid full name ! (use only alphanumerics)')
     .isLength({max:30})
     .withMessage('Full name must be at most 30 characters !')
     ,
@@ -63,9 +61,11 @@ const loginValidation=[
 // @desc     Register user with image upload
 // @access   Public
 router.post('/register', upload.single('image'), registerValidation, async (req, res) => {
+    console.log("here")
     // Validate registration information
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
+       
         return res.status(400).json({ success: false, errors: errors.array() });
     }
 
@@ -77,10 +77,9 @@ router.post('/register', upload.single('image'), registerValidation, async (req,
         if (user) {
             return res.status(400).json({
                 success: false,
-                errors: [{ message: 'Email already exists!' }]
+                errors: [{ msg: 'Email already exists!' }]
             });
         }
-
         // Hash the password
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
@@ -101,7 +100,7 @@ router.post('/register', upload.single('image'), registerValidation, async (req,
         // Generate token with image URI
         const token = generateToken(user, imageUri);
 
-        res.status(201).json({
+        res.status(201).send({
             success: true,
             data: {
                 id: user._id,
@@ -113,7 +112,7 @@ router.post('/register', upload.single('image'), registerValidation, async (req,
         });
     } catch (error) {
         console.error(error.message);
-        res.status(500).json({ success: false, errors: [{ message: 'Server Error' }] });
+        res.status(500).json({ success: false, errors: [{ msg: 'Server Error' }] });
     }
 });
 
