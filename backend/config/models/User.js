@@ -6,7 +6,8 @@ const userSchema=new mongoose.Schema({
     password:{type:String,required:true},
     note:{type: Number, default:0},
     role:{type:String,default:'simpleUser'},
-    localisation:{type:String,default:''}
+    localisation:{type:String,default:''},
+    image:{type:String, required:false}
 }
 )
 

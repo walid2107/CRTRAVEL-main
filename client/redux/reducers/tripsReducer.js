@@ -1,4 +1,4 @@
-import { GET_ALL_TRIPS,LOADING_TRIPS_ERROR, SHARE_NEW_TRIP, SHARE_TRIP_ERROR } from "../actions/tripsActions";
+import { GET_ALL_My_TRIPS, GET_ALL_TRIPS,LOADING_TRIPS_ERROR, SHARE_NEW_TRIP, SHARE_TRIP_ERROR } from "../actions/tripsActions";
 
 
 const initialState={
@@ -32,7 +32,11 @@ export default function(state=initialState,action){
             ...state,
             error: action.payload
         }
-                
+        case GET_ALL_My_TRIPS:
+            return {
+                ...state,
+                mytrips: action.payload
+            }    
        
     }
     return state;

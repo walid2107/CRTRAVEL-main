@@ -5,7 +5,7 @@ import Stars from 'react-native-stars';
 import Icon from 'react-native-vector-icons/MaterialCommunityIcons';
 import { useNavigation } from '@react-navigation/native';
 
-const TripCard = ({ trip, onBook }) => {
+const MyTripCard = ({ trip }) => {
   const navigation = useNavigation();
 
   const navigateToDiscussionRoom = () => {
@@ -16,7 +16,7 @@ const TripCard = ({ trip, onBook }) => {
     <Card style={styles.card}>
       <Card.Title
         title={trip.postOwner.fullName}
-        left={() => <Avatar.Image size={40} source={{ uri:'http://192.168.245.153:5000'+trip.postOwner.image }} />}
+        left={() => <Avatar.Image size={40} source={{ uri: 'http://192.168.245.153:5000'+trip.postOwner.image }} />}
       />
       <Card.Cover source={{ uri: 'http://192.168.245.153:5000'+trip.image }} />
       <Card.Content>
@@ -30,29 +30,13 @@ const TripCard = ({ trip, onBook }) => {
         {/* Map through services and activities */}
         <Text>Services: {trip.services.map(service => service.name).join(', ')}</Text>
         <Text>Activities: {trip.activities.map(activity => activity.name).join(', ')}</Text>
-        <Stars
-          default={0}
-          count={5}
-          half={true}
-          starSize={30} // Adjust star size
-          fullStar={<Icon name={'star'} style={[styles.myStarStyle, { fontSize: 30 }]} />}
-          emptyStar={<Icon name={'star-outline'} style={[styles.myStarStyle, styles.myEmptyStarStyle, { fontSize: 30 }]} />}
-          halfStar={<Icon name={'star-half'} style={[styles.myStarStyle, { fontSize: 30 }]} />}
-          update={(rating) => console.log(rating)}
-        />
       </Card.Content>
       <Card.Actions>
-        {/* Like button with matching color */}
-        <Button icon="thumb-up" textColor='white' mode="text" onPress={() => console.log('Liked')} style={styles.likeButton}>Like</Button>
-        {/* Book button with matching color */}
-        <Button mode="contained" onPress={()=>{onBook(trip)}} style={styles.bookButton}>Book</Button>
-        {/* Icon to navigate to discussion room */}
-        <Icon
-          name="forum"
-          size={30}
-          style={styles.discussionIcon}
-          onPress={navigateToDiscussionRoom}
-        />
+        <Text>Likes: 250</Text>
+        <Text> </Text>
+        <Text>Reservations: 10</Text>
+        <Text> </Text>
+        <Text>Rating: 2,5</Text>
       </Card.Actions>
     </Card>
   );
@@ -81,4 +65,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default TripCard;
+export default MyTripCard;

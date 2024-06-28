@@ -119,7 +119,7 @@ router.post('/create',verifyToken,upload,parseTripDetails,createTripValidation, 
     await trip.save();
     let newTrip = await trip.populate({
       path: 'postOwner',
-      select: 'fullName _id'
+      select: 'fullName _id image'
     });
 
     res.status(201).json({ trip: newTrip, success: true });
@@ -141,13 +141,30 @@ router.get('/get/all',verifyToken,async (req, res) => {
     try {
         const trips = await Trip.find().populate('services').populate('activities').populate({
             path: 'postOwner',
-            select: 'fullName _id'
+            select: 'fullName _id image'
         });
         res.json(trips);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
 });
+
+// @route    POST /api/trips/get/all/MyT,rips
+// @desc     Get all MyTrips
+//@access    Private
+
+router.get('/get/all/MyTrips/',verifyToken,async (req, res) => {
+    try {
+        const trips = await Trip.find({postOwner:req.user._id}).populate('services').populate('activities').populate({
+            path: 'postOwner',
+            select: 'fullName _id image'
+        });
+        res.json({trips,success:true});
+    } catch (error) {
+        res.status(500).json({ error: error.message,success:false });
+    }
+});
+
 
 // @route    POST /api/trips/get/:id
 // @desc      Get a trip by ID

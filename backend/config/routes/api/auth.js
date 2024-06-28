@@ -1,15 +1,34 @@
-const express=require('express');
-const {check, validationResult, body} = require('express-validator');
-const bcrypt=require('bcryptjs');
-const jwt=require('jsonwebtoken');
-const router=express.Router();
+const express = require('express');
+const { check, validationResult } = require('express-validator');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
+const multer = require('multer');
+const router = express.Router();
 
-const User=require('../../models/User');
+const User = require('../../models/User');
 
-//generate token
+// Multer setup for file uploads
+const storage = multer.diskStorage({
+    destination: function (req, file, cb) {
+        cb(null, 'uploads/'); 
+    },
+    filename: function (req, file, cb) {
+        cb(null, Date.now() + '-' + file.originalname); 
+    }
+});
 
-const generateToken=(user)=>{
-    return jwt.sign({_id:user._id,email:user.email,fullName:user.fullName},'SUPERKEYSECRETCRTRAVEL2024');
+const upload = multer({ storage: storage });
+
+// Generate token
+const generateToken = (user, imageUri = null) => {
+    const payload = {
+        _id: user._id,
+        email: user.email,
+        fullName: user.fullName,
+        image: imageUri 
+    };
+
+    return jwt.sign(payload, 'SUPERKEYSECRETCRTRAVEL2024');
 }
 
 //implement controles for user register infomations
@@ -41,51 +60,66 @@ const loginValidation=[
 ]
 
 // @route    POST /api/users/register
-// @desc     Register user
-//@access    Public
-router.post('/register', registerValidation ,async (req,res)=>{
-    //validate register informations
-    const errors=validationResult(req);
-    if(!errors.isEmpty()){
-        return res.status(404).json({success:false,errors:errors.array()});
-    }
-    //check user exist
-    const userExist=await User.findOne({email:req.body.email});
-    if(userExist){
-        return res.status(400).send({success:false,"errors": [
-        {
-            "type": "field",
-            "value": req.body.email,
-            "message": "Email already exist !",
-            "path": "email",
-            "location": "body"
-        }]
-    })
+// @desc     Register user with image upload
+// @access   Public
+router.post('/register', upload.single('image'), registerValidation, async (req, res) => {
+    // Validate registration information
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(400).json({ success: false, errors: errors.array() });
     }
 
-    //hashing the password
-    const salt=await bcrypt.genSalt();
-    const hashPassword=await bcrypt.hash(req.body.password,salt);
+    // Check if user already exists
+    const { fullName, email, password } = req.body;
+    try {
+        let user = await User.findOne({ email });
 
-    const user=new User({
-        fullName:req.body.fullName,
-        email:req.body.email,
-        password:hashPassword,
-    });
+        if (user) {
+            return res.status(400).json({
+                success: false,
+                errors: [{ message: 'Email already exists!' }]
+            });
+        }
 
-    try{
-        //create and assign a token
-        const token=generateToken(user);
-        const savedUser=await user.save();
-        res.send({success:true,data:{id:savedUser._id,fullName:savedUser.fullName,email:savedUser.email},token});
-    }catch(error){
+        // Hash the password
+        const salt = await bcrypt.genSalt(10);
+        const hashedPassword = await bcrypt.hash(password, salt);
+
+        // Create new user with image URI if uploaded
+        const imageUri = req.file ? `/uploads/${req.file.filename}` : undefined; 
+        
+        user = new User({
+            fullName,
+            email,
+            password: hashedPassword,
+            image: imageUri 
+        });
+
+        // Save the user
+        await user.save();
+
+        // Generate token with image URI
+        const token = generateToken(user, imageUri);
+
+        res.status(201).json({
+            success: true,
+            data: {
+                id: user._id,
+                fullName: user.fullName,
+                email: user.email,
+                image: imageUri 
+            },
+            token
+        });
+    } catch (error) {
         console.error(error.message);
-        res.status(400).send({success:false, errors:[{message:'Server Error'}]});
+        res.status(500).json({ success: false, errors: [{ message: 'Server Error' }] });
     }
-})
+});
+
 
 // @route    POST /api/users/login
-// @desc     Register user
+// @desc     Login user
 //@access    Public
 router.post('/login', loginValidation ,async (req,res)=>{
 

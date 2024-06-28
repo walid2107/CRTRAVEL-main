@@ -81,15 +81,18 @@ router.get('/get/tripowner/trip',verifyToken,async (req, res) => {
     try {
         const userId = req.user._id;
     
-        const reservations = await Reservation.find().populate({ path: 'trip',match: { postOwner: userId }});
+        const reservations = await Reservation.find().populate({ path: 'trip',match: { postOwner: userId }}).populate({ path: 'additionalServices'}).populate({ path:'additionalActivities'}).populate({
+            path: 'user',
+            select: 'fullName _id image'
+          });
   
         if (reservations.length === 0) {
-          return res.status(404).json({ message: 'No reservations found.' });
+          return res.status(404).json({errors:[{ msg: 'No reservations found.' }],success:false});
         }
     
-        res.json(reservations);
+        res.json({reservations,success:true});
       } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ errors: [{msg:error.message}], success:false });
       }
     });
 
@@ -126,14 +129,14 @@ router.put('/confirm/:id',verifyToken,async (req, res) => {
         const reservation = await Reservation.findOne({_id:req.params.id}).populate({ path: 'trip',match: { postOwner: userId}});
   
         if (reservation.length === 0) {
-          return res.status(404).json({ message: 'This reservation is no more available.' });
+          return res.status(404).json({errors:[{ message: 'This reservation is no more available.' }],success:false});
         }
         reservation.confirmed=true;
         reservation.save();
-        res.json(reservation);
+        res.json({reservation,success:true});
         
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ errors: [{ msg:error.message}], success:false});
     }
 });
 
@@ -169,14 +172,14 @@ router.put('/paymentMade/:id',verifyToken,async (req, res) => {
         const reservation = await Reservation.findOne({_id:req.params.id}).populate({ path: 'trip',match: { postOwner: userId}});
   
         if (reservation.length === 0) {
-          return res.status(404).json({ message: 'This reservation is no more available.' });
+          return res.status(404).json({errors:[{ message: 'This reservation is no more available.' }],success:false});
         }
         reservation.paymentMade=true;
         reservation.save();
-        res.json(reservation);
+        res.json({reservation,success:true});
         
     } catch (error) {
-        res.status(500).json({ error: error.message });
+        res.status(500).json({ errors: [{ msg:error.message}], success:false});
     }
 });
 

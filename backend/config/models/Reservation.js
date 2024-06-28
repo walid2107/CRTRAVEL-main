@@ -30,16 +30,16 @@ const ReservationSchema = new Schema({
         type: Boolean,
         default: false
     },
-    additionalServices: [{
+    additionalServices: {
         type: [Schema.Types.ObjectId],
         ref: 'Service',
         default: []
-    }],
-    additionalActivities: [{
+    },
+    additionalActivities: {
         type: [Schema.Types.ObjectId],
         ref: 'Activity',
         default: []
-    }],
+    },
     phoneNumber:{
         type:String,
         required:true

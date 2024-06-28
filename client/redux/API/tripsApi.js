@@ -24,6 +24,25 @@ export const getAllTrips = () => {
     };
 };
 
+export const getAllMyTrips = () => {
+    return async dispatch => {
+        try {
+            const response = await axios.get(BASE_URL+'/api/trips/get/all/MyTrips/');
+            dispatch({
+                type: tripsActions.GET_ALL_My_TRIPS,
+                payload: response.data.trips
+            });
+            return response.data;
+        } catch (error) {
+            dispatch({
+                type: tripsActions.LOADING_TRIPS_ERROR,
+                payload: error.response.data
+            });
+            return error.response.data;
+        }
+    };
+};
+
 export const shareNewTrip = (trip,uri) => {
     return async dispatch => {
         try {
