@@ -1,4 +1,4 @@
-import { BOOK_TRIP_SUCESS,BOOK_TRIP_FAIL, GET_ALL_RESERVATIONS, CONFIRM_RESERVATION, CONFIRM_PAYMENT} from "../actions/reservationActions";
+import { BOOK_TRIP_SUCESS,BOOK_TRIP_FAIL, GET_ALL_RESERVATIONS, CONFIRM_RESERVATION, CONFIRM_PAYMENT, GET_My_RESERVATIONS} from "../actions/reservationActions";
 
 
 const initialState={
@@ -25,6 +25,11 @@ export default function(state=initialState,action){
         return {
             ...state,
             reservations: action.payload
+        }  
+        case GET_My_RESERVATIONS: 
+        return {
+            ...state,
+            myReservations: action.payload
         }     
         case CONFIRM_RESERVATION:{
         const updatedReservations=state.reservations.map((reservation)=>{

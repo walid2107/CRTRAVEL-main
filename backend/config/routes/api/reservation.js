@@ -80,21 +80,49 @@ router.post('/create',verifyToken,createReservationValidation, async (req, res) 
 router.get('/get/tripowner/trip',verifyToken,async (req, res) => {
     try {
         const userId = req.user._id;
-    
-        const reservations = await Reservation.find().populate({ path: 'trip',match: { postOwner: userId }}).populate({ path: 'additionalServices'}).populate({ path:'additionalActivities'}).populate({
+        const allReservations = await Reservation.find().populate({ path: 'trip',match: { postOwner: userId }}).populate({ path: 'additionalServices'}).populate({ path:'additionalActivities'}).populate({
             path: 'user',
             select: 'fullName _id image'
           });
-  
+   
+        const reservations=allReservations.filter((res)=>res.trip!=null);
         if (reservations.length === 0) {
           return res.status(404).json({errors:[{ msg: 'No reservations found.' }],success:false});
         }
-    
         res.json({reservations,success:true});
       } catch (error) {
         res.status(500).json({ errors: [{msg:error.message}], success:false });
       }
     });
+
+
+// @route    POST /api/reservations/get/myreservations
+// @desc     Get reservations for the user
+//@access    Private
+
+router.get('/get/myreservations',verifyToken,async (req, res) => {
+  try {
+      const userId = req.user._id;
+      console.log(userId)
+      console.log("-------------------------------");
+      const reservations = await Reservation.find({user:userId}).populate('trip').populate({ path: 'additionalServices'}).populate({ path:'additionalActivities'}).populate({
+          path: 'user',
+          select: 'fullName _id image'
+        }).populate({
+          path: 'trip',
+          populate: {
+            path: 'postOwner',
+            select: 'fullName _id image'
+          }
+        });
+      if (reservations.length === 0) {
+        return res.status(404).json({errors:[{ msg: 'No reservations found.' }],success:false});
+      }
+      res.json({reservations,success:true});
+    } catch (error) {
+      res.status(500).json({ errors: [{msg:error.message}], success:false });
+    }
+  });
 
 
 // @route    POST /api/reservations/get/tripowner/trip/:id
@@ -183,44 +211,4 @@ router.put('/paymentMade/:id',verifyToken,async (req, res) => {
     }
 });
 
-
-
-/*
-
-// @route    POST /api/trips/update/:id
-// @desc      update a trip
-//@access    Private
-router.put( '/update/:id',updateTripValidation,verifyToken,async (req, res) => {
-        const errors = validationResult(req);
-        if (!errors.isEmpty()) {
-            return res.status(400).json({ errors: errors.array() });
-        }
-
-        try {
-            const trip = await Trip.findByIdAndUpdate(req.params.id, req.body, { new: true }).populate('services').populate('activities');
-            if (!trip) {
-                return res.status(404).json({ error: 'Trip not found' });
-            }
-            res.json(trip);
-        } catch (error) {
-            res.status(500).json({ error: error.message });
-        }
-    }
-);
-
-// @route    POST /api/trips/delete/:id
-// @desc     Delete a trip by id
-//@access    Private
-router.delete('/delete/:id', verifyToken,async (req, res) => {
-    try {
-        const trip = await Trip.findByIdAndDelete(req.params.id);
-        if (!trip) {
-            return res.status(404).json({ error: 'Trip not found' });
-        }
-        res.json({ message: 'Trip deleted successfully' });
-    } catch (error) {
-        res.status(500).json({ error: error.message });
-    }
-});
-*/
-module.exports = router;
+module.exports=router;

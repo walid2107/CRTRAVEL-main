@@ -42,6 +42,27 @@ export const getAllReservations = () => {
         }
     };
 };
+
+export const getMyReservations = () => {
+    return async dispatch => {
+        try {
+            const response = await axios.get(BASE_URL+'/api/reservations/get/myreservations');
+            
+            dispatch({
+                type: reservationActions.GET_My_RESERVATIONS,
+                payload: response.data.reservations
+            });
+            return response.data;
+        } catch (error) {
+            dispatch({
+                type: reservationActions.BOOK_TRIP_FAIL,
+                payload: error.response.data
+            });
+            return error.response.data;
+        }
+    };
+};
+
 export const confirmReservationAPI = (id) => {
     return async dispatch => {
         try {

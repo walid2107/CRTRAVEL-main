@@ -1,5 +1,5 @@
-import React, { useEffect,  } from 'react';
-import { SafeAreaView, StyleSheet, FlatList, Alert } from 'react-native';
+import React, { useEffect,useState  } from 'react';
+import { SafeAreaView, StyleSheet, FlatList, Alert,Text } from 'react-native';
 import { connect } from 'react-redux';
 import { getAllReservations,confirmReservationAPI,confirmPaymentAPI } from '../redux/API/reservationAPI';
 import ReservationCard from '../Components/ReservationCard';
@@ -14,13 +14,13 @@ const ReservationsList = ({ reservations, confirmReservation, confirmPayment }) 
     await confirmPayment(reservationId);
   };
 
-  const renderItem = ({ item }) => (
-    <ReservationCard
+  const renderItem = ({ item }) =>{
+   return (<ReservationCard
       reservation={item}
       onConfirmReservation={handleConfirmReservation}
       onConfirmPayment={handleConfirmPayment}
-    />
-  );
+    />)
+};
 
   return (
     <FlatList
@@ -33,9 +33,15 @@ const ReservationsList = ({ reservations, confirmReservation, confirmPayment }) 
 
 const ReservationsScreen = (props) => {
   const { reservations, getAllReservations,confirmReservationAPI,confirmPaymentAPI, navigation } = props;
-
+  const [error,setError]=useState(false);
   useEffect(() => {
-    getAllReservations();
+    setError(false);
+    getAllReservations().then(result=>{
+      if(!result.success)
+        {
+          setError(true);
+        }
+    });
   }, [navigation]);
  
   const confirmReservation = async (reservationId) => {
@@ -74,13 +80,13 @@ const ReservationsScreen = (props) => {
 
   return (
     <SafeAreaView style={styles.container}>
-      {reservations.length > 0 && (
+      {!error ?(
         <ReservationsList
           reservations={reservations}
           confirmReservation={confirmReservation}
           confirmPayment={confirmPayment}
         />
-      )}
+      ):<Text>No reservations found for your trips.</Text>}
     </SafeAreaView>
   );
 };
